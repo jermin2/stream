@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <form action="/update" method="post">
+        <input type="text" name="name" placeholder="Name">
+        <input type="text" name="address_1" placeholder="Address Line 1">
+        <input type="text" name="address_2" placeholder="Address Line 2">
+        <input type="text" name="address_3" placeholder="Address Line 3">
+        
+        <select name="country">
+            <option disabled selected value="">Country</option>
+            {% for country in countries %}
+                <option value="{{country}}">{{ country }}</option>
+            {% endfor %}
+        </select>
+
+        
+        <input type="checkbox" name="active" id="active">
+        <label for="active">Send me the magazine</label>
+
+        <input type="submit" value="Register">
+    </form>
+
+{% endblock %}
