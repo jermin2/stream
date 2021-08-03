@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, current_app, g
 from flask_session import Session
 
 import sqlite3
@@ -9,6 +9,7 @@ from passlib.hash import sha256_crypt
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config['DATABASE'] = "stream.db"
 Session(app)
 
 countries = ["NZ", "AUS", "Fiji", "Samoa"]
@@ -23,56 +24,58 @@ def create_connection(path):
 
     return connection
 
-def execute_query(connection, query, variables):
-    cursor = connection.cursor()
-    try:
-        cursor.execute(query, variables)
-        connection.commit()
-        print("Query executed succesfully")
-        return 
+db = create_connection("stream.db")
 
-    except Error as e:
-        print(f"the error '{e}' occurred")
-
-def select_person(connection, name):
-    """
-    Query all the rows in the user table for the given user email
-    :param connection: the Connection object
-    :return:
-    """
-    cur = connection.cursor()
-    try:
-        cur.execute("""SELECT * FROM users WHERE email = ?""", name)
-        print("Query executed succesfully")
-        return cur.fetchone()
+# https://flask.palletsprojects.com/en/2.0.x/tutorial/database/
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+            current_app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        g.db.row_factory =  sqlite3.Row
     
-    except Error as e:
-        print(f"the error '{e}' occurred")
+    return g.db
 
+def close_db(e=None):
+    db = g.pop('db', None)
+
+    if db is not None:
+        db.close()
 
 
 @app.route("/")
 def index():
-    if not session.get("name"):
-        return redirect("/login")
+
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
 
-        db = create_connection("stream.db")
-        with db:
-            result = select_person(db, (request.form.get("email").lower(),))
-        
-        if not result or len(result) < 1:
-            return render_template("login.html")
+        email = request.form.get("email").lower()
+        password = request.form.get("password")
+        db = get_db()
+        error = None
+        user = db.execute(
+            'SELECT * FROM users WHERE email = ?', (email, )
+        ).fetchone()
 
-        verified = sha256_crypt.verify(request.form.get("password"), str(result[5]))
+        # Check is user is found
+        if user is None:
+            error = "Invalid Email"
+        # Check password is correct
+        elif not sha256_crypt.verify(password, str(user['hash']) ):
+            error = "Incorrect password."
 
-        if verified:
-            session["name"] = request.form.get("name")
+        if error is None:
+            session.clear()
+            session["name"] = email
             return redirect("/update")
+
+        flash(error)
+        # TODO
+        return error
         
     return render_template("login.html")
 
@@ -84,36 +87,105 @@ def logout():
 @app.route("/register", methods=["POST", "GET"])
 def register():
 
+    if session.get("name"):
+        return redirect("/logout")
+
+    # If user has already logged in, send them to the update page
+    if session.get("name"):
+        return redirect("/update")
+
     # Show the registration form
     if request.method == "GET":
         return render_template("register.html")
 
     # Register a new user
     if request.method == "POST":
-        if len(request.form.get("password")) < 8:
-            return "password must be 8 characters long"
-        if request.form.get("password") != request.form.get("confirm_password"):
-            return "passwords do not match"
+        email = request.form.get("email")
+        password = request.form.get("password")
+        db = get_db()
+        error = None
 
-        db = create_connection("stream.db")
-        with db:
-            result = select_person(db, (request.form.get("email").lower(),))
+        # Length of password 8 or greater
+        if len(password) < 8:
+            error = "password must be 8 characters long"
+        # Confirmation password must match
+        elif password != request.form.get("confirm_password"):
+            error = "passwords do not match"
+        # Check if user already exists
+        elif db.execute(
+            'SELECT id FROM users WHERE email = ?', (email, )
+        ).fetchone() is not None:
+            error = f"User {email} is already registered."
 
-        # If user already exists, return a emssage
-        if result and len(result) > 0:
-            return "user already exists"
-        else:
-            hash = sha256_crypt.encrypt(request.form.get("password"))
-            execute_query(db, "INSERT INTO users(email, hash) VALUES(?,?)", (request.form.get("email"), hash) )
-            return "registered succesfully"
+        if error is None:
+            db.execute(
+                'INSERT INTO users (email, hash) VALUES (?, ?)',
+                (email, sha256_crypt.encrypt(password))
+            )
+            db.commit()
+            return redirect('/login')
+        
+        # TODO
+        flash(error)
+        return error
 
+
+        
 @app.route("/update", methods=["POST", "GET"])
 def update():
 
+    if not session.get("name"):
+        return redirect("/login")
+
     # Fetch the users details to display
     if request.method == "GET":
+        ### TODO ###
+        email = session.get("name")
+        db = get_db()
+
+        
         return render_template("update.html", countries=countries)
 
     # Update the users details
     if request.method == "POST":
-        return "NOT YET IMPLEMENTED"
+
+        # Check if details exist
+        fName = request.form.get("first_name")
+        lName = request.form.get("last_name")
+        address_1 = request.form.get("address_1")
+        address_2 = request.form.get("address_2")
+        city = request.form.get("city")
+        zip_code = request.form.get("zip")
+        country = request.form.get("country")
+        email = session.get("name")
+        db = get_db()
+
+        # Find the user id
+        user_id = db.execute( 
+            ' SELECT id FROM users WHERE email = ?', (email,)
+        ).fetchone()['id']
+
+        # Check if data already exists
+        if db.execute(
+            ' SELECT * FROM addresses WHERE user_id = ?', (user_id, )
+        ).fetchone() is None:
+            # if user does not exist, add the new info to the database
+            print("No data exists for this person yet")
+            db.execute(
+                ' INSERT INTO addresses (first_name, last_name, user_id, address_1, address_2, zip, city, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                (fName, lName, user_id, address_1, address_2, zip_code, city, country)
+            )
+            db.commit()
+
+        else:
+            #if user exist, update the database
+            print("there is some data for this person")
+            db.execute(
+                'UPDATE addresses SET first_name = ?, last_name = ?, address_1 = ?, address_2 = ?, zip = ?, city = ?, country = ? WHERE user_id = ?',
+                (fName, lName, address_1, address_2, zip_code, city, country, user_id)
+            )
+            db.commit()
+
+        return redirect('/update')
+
+        
