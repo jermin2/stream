@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session, current_app, g
+from flask import Flask, flash, redirect, render_template, request, session, current_app, g
 from flask_session import Session
 
 import sqlite3
@@ -71,11 +71,12 @@ def login():
         if error is None:
             session.clear()
             session["name"] = email
+
             return redirect("/update")
 
         flash(error)
         # TODO
-        return error
+        #return error
         
     return render_template("login.html")
 
@@ -107,10 +108,10 @@ def register():
 
         # Length of password 8 or greater
         if len(password) < 8:
-            error = "password must be 8 characters long"
+            error = "Password must be 8 characters long"
         # Confirmation password must match
         elif password != request.form.get("confirm_password"):
-            error = "passwords do not match"
+            error = "Passwords do not match"
         # Check if user already exists
         elif db.execute(
             'SELECT id FROM users WHERE email = ?', (email, )
@@ -127,9 +128,7 @@ def register():
         
         # TODO
         flash(error)
-        return error
-
-
+        return redirect('/register')
         
 @app.route("/update", methods=["POST", "GET"])
 def update():
@@ -143,8 +142,16 @@ def update():
         email = session.get("name")
         db = get_db()
 
+        user_id = db.execute( 
+            ' SELECT id FROM users WHERE email = ?', (email,)
+        ).fetchone()['id']
+
+        if user_id is not None:
+            user = db.execute( 
+                ' SELECT * FROM addresses WHERE user_id = ? ', (user_id,)
+            ).fetchone()
         
-        return render_template("update.html", countries=countries)
+        return render_template("update.html", countries=countries, user=user)
 
     # Update the users details
     if request.method == "POST":
@@ -152,11 +159,14 @@ def update():
         # Check if details exist
         fName = request.form.get("first_name")
         lName = request.form.get("last_name")
-        address_1 = request.form.get("address_1")
-        address_2 = request.form.get("address_2")
+        address = request.form.get("address")
+        village = request.form.get("village")
+        suburb = request.form.get("suburb")
         city = request.form.get("city")
         zip_code = request.form.get("zip")
         country = request.form.get("country")
+        active = request.form.get("active")
+
         email = session.get("name")
         db = get_db()
 
@@ -170,21 +180,20 @@ def update():
             ' SELECT * FROM addresses WHERE user_id = ?', (user_id, )
         ).fetchone() is None:
             # if user does not exist, add the new info to the database
-            print("No data exists for this person yet")
             db.execute(
-                ' INSERT INTO addresses (first_name, last_name, user_id, address_1, address_2, zip, city, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                (fName, lName, user_id, address_1, address_2, zip_code, city, country)
+                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, city, country, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (fName, lName, user_id, address, village, suburb, zip_code, city, country, active)
             )
             db.commit()
 
         else:
             #if user exist, update the database
-            print("there is some data for this person")
             db.execute(
-                'UPDATE addresses SET first_name = ?, last_name = ?, address_1 = ?, address_2 = ?, zip = ?, city = ?, country = ? WHERE user_id = ?',
-                (fName, lName, address_1, address_2, zip_code, city, country, user_id)
+                'UPDATE addresses SET first_name = ?, last_name = ?, address = ?, village = ?, suburb = ?, zip = ?, city = ?, country = ?, active = ? WHERE user_id = ?',
+                (fName, lName, address, village, suburb, zip_code, city, country, active, user_id)
             )
             db.commit()
+            flash("Details updated")
 
         return redirect('/update')
 
