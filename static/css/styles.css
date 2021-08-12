@@ -91,21 +91,6 @@ html, body {
     top: 81px;
 }
 
-  @media screen and (max-width: 767px) {
-    .window-height {
-        top: 167px;
-        height: calc(100% - 167px);
-    }
-
-    .main {
-        height: calc(100% - 167px);
-    }
-
-    .about {
-        top: 167px;
-    }
-
-
   @media screen and (max-width: 600px) {
     .square {
         width: 0px;
