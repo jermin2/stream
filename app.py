@@ -173,7 +173,7 @@ def update():
         zip_code = request.form.get("zip")
         country = request.form.get("country")
         province = request.form.get("province")
-        active = request.form.get("active")
+        inactive = "1" if request.form.get("active") != "1" else None
         phone = request.form.get("phone")
         
         today = date.today().strftime("%d/%m/%Y")
@@ -192,8 +192,8 @@ def update():
         ).fetchone() is None:
             # if user does not exist, add the new info to the database
             db.execute(
-                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, province, city, country, active, phone, date_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                (fName, lName, user_id, address, village, suburb, zip_code, province, city, country, active, phone, today)
+                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, province, city, country, inactive, phone, date_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (fName, lName, user_id, address, village, suburb, zip_code, province, city, country, inactive, phone, today)
             )
             db.commit()
 
@@ -204,8 +204,8 @@ def update():
         else:
             #if user exist, update the database
             db.execute(
-                'UPDATE addresses SET first_name = ?, last_name = ?, address = ?, village = ?, suburb = ?, zip = ?, province = ?, city = ?, country = ?, active = ?, phone = ? WHERE user_id = ?',
-                (fName, lName, address, village, suburb, zip_code, province, city, country, active, phone, user_id)
+                'UPDATE addresses SET first_name = ?, last_name = ?, address = ?, village = ?, suburb = ?, zip = ?, province = ?, city = ?, country = ?, inactive = ?, phone = ? WHERE user_id = ?',
+                (fName, lName, address, village, suburb, zip_code, province, city, country, inactive, phone, user_id)
             )
             db.commit()
             flash("Details updated")

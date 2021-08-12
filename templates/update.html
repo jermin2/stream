@@ -118,7 +118,7 @@
         </div>
         <hr class="my-4">
         <div class="form-check h5">
-            {% if user['active'] == 0 %}
+            {% if user['inactive'] == 1 %}
                 <input type="checkbox" class="form-check-input" id="active" name="active" value="1">
             {% else %}
                 <input type="checkbox" class="form-check-input" id="active" name="active" value="1" checked>
