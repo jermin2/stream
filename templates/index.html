@@ -1,19 +1,18 @@
 {% extends "layout.html" %}
 
 {% block body %}
+<div class="img-container window-height">
+  <img src="/static/stream.png" class="img-fluid rocks" alt="Responsive image">
+</div>
 
-
-<section class="py-5 text-center container">
-    <div class="row py-lg-5">
-      <div class="col-lg-6 col-md-8 mx-auto">
-        <h1 class="fw-light">Stream Magazine</h1>
-        <p class="lead text-muted">Something simple here about the stream magazine.</p>
-        <p>
-          <a href="#" class="btn btn-primary my-2">Register for free</a>
-        </p>
-      </div>
+<div class="p-5 mb-4 rounded-3 main-box">
+    <div class="container-fluid py-5">
+      <h1 class="display-5 fw-bold">South Pacific Ministry and Fellowship</h1>
+      <p class="col-md-8 fs-4">A free magazine sent to your house twice a year. <br/>No fees, no subscription.</p>
+      <a href="/register" class="btn btn-primary btn-lg" type="button">Register for free</a>
     </div>
-  </section>
+  </div>
+  <div class="square window-height"></div>  
 
 
 {% endblock %}

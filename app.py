@@ -12,7 +12,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.config['DATABASE'] = "stream.db"
 Session(app)
 
-countries = ["NZ", "AUS", "Fiji", "Samoa"]
+countries = ["NZ", "Australia", "Fiji", "Samoa", "Solomon Islands"]
 
 def create_connection(path):
     connection = None
@@ -71,18 +71,19 @@ def login():
         if error is None:
             session.clear()
             session["name"] = email
+            flash("Logged in")
 
             return redirect("/update")
 
         flash(error)
-        # TODO
-        #return error
+
         
     return render_template("login.html")
 
 @app.route("/logout")
 def logout():
     session["name"] = None
+    flash("Logged out")
     return redirect("/")
     
 @app.route("/register", methods=["POST", "GET"])
@@ -151,7 +152,7 @@ def update():
                 ' SELECT * FROM addresses WHERE user_id = ? ', (user_id,)
             ).fetchone()
         
-        return render_template("update.html", countries=countries, user=user)
+        return render_template("update.html", countries=countries, user=user, email=email)
 
     # Update the users details
     if request.method == "POST":
@@ -165,7 +166,9 @@ def update():
         city = request.form.get("city")
         zip_code = request.form.get("zip")
         country = request.form.get("country")
+        province = request.form.get("province")
         active = request.form.get("active")
+        phone = request.form.get("phone")
 
         email = session.get("name")
         db = get_db()
@@ -181,16 +184,16 @@ def update():
         ).fetchone() is None:
             # if user does not exist, add the new info to the database
             db.execute(
-                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, city, country, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                (fName, lName, user_id, address, village, suburb, zip_code, city, country, active)
+                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, province, city, country, active, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (fName, lName, user_id, address, village, suburb, zip_code, province, city, country, active, phone)
             )
             db.commit()
 
         else:
             #if user exist, update the database
             db.execute(
-                'UPDATE addresses SET first_name = ?, last_name = ?, address = ?, village = ?, suburb = ?, zip = ?, city = ?, country = ?, active = ? WHERE user_id = ?',
-                (fName, lName, address, village, suburb, zip_code, city, country, active, user_id)
+                'UPDATE addresses SET first_name = ?, last_name = ?, address = ?, village = ?, suburb = ?, zip = ?, province = ?, city = ?, country = ?, active = ?, phone = ? WHERE user_id = ?',
+                (fName, lName, address, village, suburb, zip_code, province, city, country, active, phone, user_id)
             )
             db.commit()
             flash("Details updated")
@@ -198,3 +201,6 @@ def update():
         return redirect('/update')
 
         
+@app.route("/about", methods=["GET"])
+def about():
+    return render_template("about.html")

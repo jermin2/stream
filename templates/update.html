@@ -2,7 +2,7 @@
 
 {% block body %}
 
-<main class="form-signin text-center">
+<main class="form-details text-center">
     <form action="/update" method="post">
         <h1 class="h3 mb-3 fw-normal">Update Details</h1>
         <div class="row g-3">
@@ -22,35 +22,19 @@
             </div>
             </div>
 
-            <div class="col-12">
-            <label for="address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="address" placeholder="1234 Main St" value="{{user['address']}}" required="" name="address_1">
-            <div class="invalid-feedback">
-                Please enter your address
-            </div>
+            <div class="form-floating col-sm-6">
+                <input type="text" class="form-control" id="email" placeholder=""  value="{{email}}" name="email" disabled>
+                <label for="email" >Email</label>             
             </div>
 
-            <div class="col-12">
-            <label for="village" class="form-label">Village<span class="text-muted">(Optional)</span></label>
-            <input type="text" class="form-control" id="village" placeholder=""  value="{{user['village']}}" name="village">
+            <div class="form-floating col-sm-6">
+                <input type="text" class="form-control" id="phone" placeholder=""  value="{{user['phone']}}" name="phone">
+                <label for="phone" >Phone<span class="text-muted">(Optional)</span></label>             
             </div>
 
-            <div class="col-12">
-                <label for="suburb" class="form-label">Suburb<span class="text-muted">(Optional)</span></label>
-                <input type="text" class="form-control" id="suburb" placeholder=""  value="{{user['suburb']}}" name="suburb">
-            </div>
-
-            <div class="col-12">
-                <label for="city" class="form-label">City<span class="text-muted"></span></label>
-                <input type="text" class="form-control" id="city" placeholder="City/Town"  required="" value="{{user['city']}}" name="city">
-                <div class="invalid-feedback">
-                    Please enter your city
-                </div>
-            </div>
-
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <label for="country" class="form-label">Country</label>
-                <select class="form-select" id="country" required="" name="country" value="{{user['country']}}">
+                <select class="form-select text-center" id="country" required="" name="country" value="{{user['country']}}">
                     <option value="">Choose...</option>
                     {% for country in countries %}
                         {% if user['country']==country %}
@@ -65,16 +49,78 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <label for="zip" class="form-label">Zip</label>
-                <input type="text" class="form-control" id="zip" placeholder="" value="{{user['zip']}}" required="" name="zip">
+            <script type="text/javascript">
+                document.getElementById('country').onchange = function(){
+                    country = document.getElementById('country')
+
+                    // If the country is Solomon Islands, show the province field. Otherwise hide it
+                    if (country.value == "Solomon Islands") {
+                        document.getElementById('province-div').style.display = "block"
+                    }
+                    else {
+                        document.getElementById('province-div').style.display = "none"
+                    }
+
+                    // If the country is NZ or Austrlia, hide the village field, otherwise show it
+                    if (country.value == "NZ" || country.value == "Australia") {
+                        document.getElementById('village-div').style.display = "none"
+                    }
+                    else {
+                        document.getElementById('village-div').style.display = "block"
+                    }
+                }
+            </script>
+
+            <div class="col-sm-12">
+            <label for="address" class="form-label">Address</label>
+            <input type="text" class="form-control" id="address" placeholder="1234 Main St" value="{{user['address']}}" required="" name="address">
+                <div class="invalid-feedback">
+                    Please enter your address
+                </div>
+            </div>
+
+            {% if user['country'] == "NZ" or user['country'] == "Australia" %}
+                <div class="form-floating col-sm-6" id="village-div"  style="display:none">
+            {% else %}
+                <div class="form-floating col-sm-6" id="village-div">
+            {% endif %}
+                <input type="text" class="form-control" id="village" placeholder="" value="{{user['village']}}" name="village">
+                <label for="village">Village<span class="text-muted">(Optional)</span></label>
+            </div>
+
+            <div class="form-floating col-sm-6">
+                <input type="text" class="form-control" id="suburb" placeholder=""  value="{{user['suburb']}}" name="suburb">
+                <label for="suburb" >Suburb<span class="text-muted">(Optional)</span></label>             
+            </div>
+
+            {% if user['country'] == "Solomon Islands" %}
+                <div class="form-floating col-sm-6" id="province-div">
+            {% else %}
+                <div class="form-floating col-sm-6" id="province-div" style="display:none">
+            {% endif %}
+                <input type="text" class="form-control" id="province" placeholder="" value="{{user['province']}}" name="province">
+                <label for="province">Province<span class="text-muted">(Optional)</span></label>
+            </div>
+
+            <div class="form-floating col-sm-6">
+                <input type="text" class="form-control" id="zip" placeholder="Zip" value="{{user['zip']}}" required="" name="zip">
+                <label for="zip">Zip<span class="text-muted">(Optional)</span></label>
                 <div class="invalid-feedback">
                     Zip code required.
                 </div>
             </div>
+
+            <div class="form-floating col-sm-12">
+                <input type="text" class="form-control" id="city" placeholder=""  value="{{user['city']}}" name="city">
+                <label for="city" >City</label>  
+                <div class="invalid-feedback">
+                    Please enter your city
+                </div>           
+            </div>
+
         </div>
         <hr class="my-4">
-        <div class="form-check">
+        <div class="form-check h5">
             {% if user['active'] == 1 %}
                 <input type="checkbox" class="form-check-input" id="active" name="active" value="1" checked>
             {% else %}

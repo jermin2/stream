@@ -5,12 +5,19 @@
     margin: auto;
 }
 
+.form-details {
+    width: 100%;
+    max-width: 600px;
+    padding: 15px;
+    margin: auto;
+}
+
 .main {
     display: flex;
     align-items: center;
     padding-top: 40px;
     padding-bottom: 40px;
-    height: calc(100vh - 73px);
+    height: calc(100vh - 81px);
 }
 html, body {
     height: 100%;
@@ -20,4 +27,92 @@ html, body {
 .navbar {
     height: 73px;
     display: block;
+    z-index: 999;
 }
+
+.alert {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+.main-box {
+    z-index: 99;
+    background: rgba(255, 255, 255, 0.7);
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.rocks {
+    width: 100%;
+}
+
+.img-container {
+    right: 0;
+    width: 60%;
+    max-width: 900px;
+    position: absolute;
+    z-index: 1;
+    overflow:hidden;
+}
+
+
+
+.square {
+    width: calc(100% - 900px);
+    background-color: #E2B80F;
+    position: absolute;   
+    left: 0;
+    z-index: 2
+  }
+
+  /* make the square 40% of the screen */
+  @media screen and (max-width: 1500px) {
+    .square {
+        width: 40%;
+    }
+  }
+
+  /* The rock image is 948px. If we shrink it, there will be a hole */
+  @media screen and (max-height: 948px) and (max-width: 1000px) {
+    .img-container {
+        width: 658px;
+    }
+  }
+
+  .window-height {
+    top: 81px;
+    height: calc(100% - 81px);
+  }
+
+  .about {
+    position:absolute;
+    top: 81px;
+}
+
+  @media screen and (max-width: 767px) {
+    .window-height {
+        top: 167px;
+        height: calc(100% - 167px);
+    }
+
+    .main {
+        height: calc(100% - 167px);
+    }
+
+    .about {
+        top: 167px;
+    }
+
+
+  @media screen and (max-width: 600px) {
+    .square {
+        width: 0px;
+    }
+
+    }
+
+
+
+  }
