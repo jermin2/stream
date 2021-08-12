@@ -1,6 +1,8 @@
 from flask import Flask, flash, redirect, render_template, request, session, current_app, g
 from flask_session import Session
 
+from datetime import date
+
 import sqlite3
 from sqlite3 import Error
 
@@ -125,7 +127,11 @@ def register():
                 (email, sha256_crypt.encrypt(password))
             )
             db.commit()
-            return redirect('/login')
+
+            session["name"] = email
+            flash("Logged in")
+
+            return redirect('/update')
         
         # TODO
         flash(error)
@@ -169,6 +175,8 @@ def update():
         province = request.form.get("province")
         active = request.form.get("active")
         phone = request.form.get("phone")
+        
+        today = date.today().strftime("%d/%m/%Y")
 
         email = session.get("name")
         db = get_db()
@@ -184,10 +192,14 @@ def update():
         ).fetchone() is None:
             # if user does not exist, add the new info to the database
             db.execute(
-                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, province, city, country, active, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                (fName, lName, user_id, address, village, suburb, zip_code, province, city, country, active, phone)
+                ' INSERT INTO addresses (first_name, last_name, user_id, address, village, suburb, zip, province, city, country, active, phone, date_start) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (fName, lName, user_id, address, village, suburb, zip_code, province, city, country, active, phone, today)
             )
             db.commit()
+
+
+
+
 
         else:
             #if user exist, update the database

@@ -105,9 +105,6 @@
             <div class="form-floating col-sm-6">
                 <input type="text" class="form-control" id="zip" placeholder="Zip" value="{{user['zip']}}" required="" name="zip">
                 <label for="zip">Zip<span class="text-muted">(Optional)</span></label>
-                <div class="invalid-feedback">
-                    Zip code required.
-                </div>
             </div>
 
             <div class="form-floating col-sm-12">
@@ -121,10 +118,10 @@
         </div>
         <hr class="my-4">
         <div class="form-check h5">
-            {% if user['active'] == 1 %}
-                <input type="checkbox" class="form-check-input" id="active" name="active" value="1" checked>
+            {% if user['active'] == 0 %}
+                <input type="checkbox" class="form-check-input" id="active" name="active" value="1">
             {% else %}
-                <input type="checkbox" class="form-check-input" id="active" name="active" value="1" >
+                <input type="checkbox" class="form-check-input" id="active" name="active" value="1" checked>
             {% endif %}
             <label class="form-check-label" for="active">Send me the free magazine</label>
         </div>
