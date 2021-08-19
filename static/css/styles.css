@@ -57,8 +57,6 @@ html, body {
     overflow:hidden;
 }
 
-
-
 .square {
     width: calc(100% - 900px);
     background-color: #E2B80F;

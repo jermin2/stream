@@ -197,10 +197,6 @@ def update():
             )
             db.commit()
 
-
-
-
-
         else:
             #if user exist, update the database
             db.execute(

@@ -11,6 +11,8 @@
         <link href="/static/css/styles.css" rel="stylesheet">
     </head>
     <body>
+
+      <!-- Modified from https://getbootstrap.com/docs/5.0/examples/headers/ -->
         <div class="container navbar">
             <header class="d-flex align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
               <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
@@ -24,10 +26,11 @@
         
               <div class="col-md-3 text-end d-flex">
                 {% if session.name %}
+                    <a href="/update" type="button" class="btn btn-primary me-2">Update</a>
                     <a href="/logout" type="button" class="btn btn-outline-primary me-2">Logout</a>
                 {% else %}
                     <a href="/login" type="button" class="btn btn-outline-primary me-2">Login</a>
-                    <a href="/register" type="button" class="btn btn-primary">Register</a>
+                    <a href="/register" type="button" class="btn btn-primary me-2">Register</a>
                 {% endif %}
 
               </div>
