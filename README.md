@@ -1,5 +1,5 @@
 # STREAM
-#### Video Demo:
+#### Video Demo: https://youtu.be/Pp2-KauhU8Q
 #### Description:
 A website that allows users to subscribe and update their to a regular magazine that will get sent to them. This application interacts and stores the user data in a database which can later be extracted to create postage labels. The end-user can login and update their details, or choose to unsubscribe at any time.
 
